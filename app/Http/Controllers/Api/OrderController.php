@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\OrderRequest;
 use App\Http\Resources\OrderResource;
 use App\Models\Order;
 use App\Models\Product;
@@ -18,9 +17,11 @@ class OrderController extends Controller
         $this->order = $order;
     }
 
-    public function store(OrderRequest $request)
+    // Método que cria o pedido
+    public function store()
     {
         try{
+            $request = ['total' => 0, 'date' => Date()->now() ];
             $order = $this->order->create($request->all());
             return new OrderResource($order);
         }catch (\Exception $e){
@@ -29,31 +30,40 @@ class OrderController extends Controller
 
     }
 
+    // Exibição dos dados do pedido
     public function show(Order $order)
     {
         $order = $this->order->findOrFail($order);
         return new OrderResource($order);
     }
 
-
-    public function update(Order $order, OrderRequest $request)
-    {
-        $order = $order->edit($request->all());
-        return response()->json($order, 200);
-    }
-
-    public function destroy(Order $order)
-    {
-        return response()->json($order->delete());
-    }
-
-    public function relatonshipOrderProduct(Order $order, Product $product)
+    // Insere Produtos no Pedido
+    public function update(Order $order, Request $request)
     {
         try{
-            $order = $order->Products()->create(['product_id' => $product->id]);
-            return new OrderResource($order);
+
+            if(Product::find($request->product_id)){
+                $order = $order->Products()->attach(['product_id' => $request->product_id]);
+                return new OrderResource($order);
+            }
+            throw new Exception("Produto Não Existe", 504);
+
         }catch (\Exception $e){
-            return redirect()->back()->withInput()->with('error', $e->getMessage());
+            return redirect()->back()->withInput()->with('error', $e->getMessage(), 504);
+        }
+    }
+
+    // Deleta Produtos do pedido
+    public function destroy(Order $order, Request $request)
+    {
+        try{
+            if(Product::find($request->product_id)){
+                $order->Products()->detach($product->id);
+                return response()->json(['deleted'], 200);
+            }
+            throw new Exception("Produto Não Existe", 504);
+        }catch (\Exception $e){
+            return redirect()->back()->withInput()->with('error', $e->getMessage(), 504);
         }
     }
 }
