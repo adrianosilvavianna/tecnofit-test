@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ProductRequest;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
-use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
@@ -17,34 +17,54 @@ class ProductController extends Controller
     }
 
     // Cria Produto
-    public function store(Product $request)
+    public function store(ProductRequest $request)
     {
         try{
-            $order = $this->product->create($request->all());
-            return new ProductResource($order);
+            $product = $this->product->create($request->all());
+            return new ProductResource($product);
         }catch (\Exception $e){
-            return redirect()->back()->withInput()->with('error', $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 504);
         }
     }
 
     // Exibe Produto
     public function show(Product $product)
     {
-        $order = $this->product->findOrFail($product);
-        return new ProductResource($order);
+        try{
+            if(isset($product)){
+                return new ProductResource($product);
+            }
+            throw new \Exception("Produto não existe", 504);
+            
+        }catch (\Exception $e){
+            return response()->json(['error' => $e->getMessage()], 504);
+        }
+        
     }
 
     // Atualiza dados do produto
-    public function update(Product $product, ProductResource $request)
+    public function update(Product $product, ProductRequest $request)
     {
-        $order = $product->edit($request->all());
-        return response()->json($order, 200);
+        try{
+            $product->update($request->all());
+            return new ProductResource($product);
+        }catch (\Exception $e){
+            return response()->json(['error' => $e->getMessage()], 504);
+        }
+        
     }
 
     // Exclui o produto [ Permanentimente pois está usando o softdelte ]
     public function destroy(Product $product)
     {
-        return response()->json($product->delete());
+        try{
+            if(isset($product)){
+                return response()->json($product->delete());
+            }
+            throw new \Exception("Produto não existe", 504);
+        }catch (\Exception $e){
+            return response()->json(['error' => $e->getMessage()], 504);
+        }
     }
 
 }

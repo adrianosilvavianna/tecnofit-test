@@ -17,9 +17,11 @@ class OrderResource extends Resource
         return [
             'id'         => $this->id,
             'name'       => $this->date,
-            'total'      => $this->total,
-            'products'   => $this->Products->get(),
+            'total'      => $this->total,            
             'created_at' => $this->created_at,
+            'products'   => [
+                ProductResource::collection($this->Products)
+            ],
         ];
     }
 }

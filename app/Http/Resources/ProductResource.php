@@ -15,6 +15,7 @@ class ProductResource extends Resource
     public function toArray($request)
     {
         return [
+            'id' => $this->id,
             'sku' => $this->sku,
             'name' => $this->name,
             'description' => $this->description,

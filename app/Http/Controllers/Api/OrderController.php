@@ -21,11 +21,11 @@ class OrderController extends Controller
     public function store()
     {
         try{
-            $request = ['total' => 0, 'date' => Date()->now() ];
-            $order = $this->order->create($request->all());
+            $request = ['total' => 0, 'date' => date("Y-m-d") ];
+            $order = $this->order->create($request);
             return new OrderResource($order);
         }catch (\Exception $e){
-            return redirect()->back()->withInput()->with('error', $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 501);
         }
 
     }
@@ -33,7 +33,6 @@ class OrderController extends Controller
     // Exibição dos dados do pedido
     public function show(Order $order)
     {
-        $order = $this->order->findOrFail($order);
         return new OrderResource($order);
     }
 
@@ -41,15 +40,14 @@ class OrderController extends Controller
     public function update(Order $order, Request $request)
     {
         try{
-
             if(Product::find($request->product_id)){
-                $order = $order->Products()->attach(['product_id' => $request->product_id]);
+                $order->Products()->attach(['product_id' => $request->product_id]);
                 return new OrderResource($order);
             }
-            throw new Exception("Produto Não Existe", 504);
+            throw new \Exception("Produto Não Existe", 501);
 
         }catch (\Exception $e){
-            return redirect()->back()->withInput()->with('error', $e->getMessage(), 504);
+            return response()->json(['error' =>  $e->getMessage()], 501);
         }
     }
 
@@ -58,12 +56,12 @@ class OrderController extends Controller
     {
         try{
             if(Product::find($request->product_id)){
-                $order->Products()->detach($product->id);
+                $order->Products()->detach($request->product_id);
                 return response()->json(['deleted'], 200);
             }
-            throw new Exception("Produto Não Existe", 504);
+            throw new \Exception("Produto Não Existe", 504);
         }catch (\Exception $e){
-            return redirect()->back()->withInput()->with('error', $e->getMessage(), 504);
+            return response()->json(['error' => $e->getMessage()], 504);
         }
     }
 }
