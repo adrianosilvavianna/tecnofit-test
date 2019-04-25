@@ -28,6 +28,18 @@ A api possui um banco de dados relacional Mysql com 3 tabelas sendo manipuladas.
 
 O codigo e as tabelas estão em inglês por convenção.
 
+Já existe um banco configurado e com dados caso queiram usar:
+
+* Username: tidgrPvtMu
+
+* Password: JkQ9s05TrA
+
+* Database Name: tidgrPvtMu
+
+* Server: remotemysql.com
+
+* Port: 3306
+
 
 
 
